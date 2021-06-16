@@ -13,6 +13,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import { colors } from "../constants/colors";
 
 /////
 
@@ -238,7 +239,7 @@ export default function UserTYpesList() {
                   <em>Ninguno</em>
                 </MenuItem>
 
-              { ["red", "blue", "white", "green", "yellow", "grey"].map((item) => <MenuItem  key={item} value={item}>{item}</MenuItem>)}
+              {colors.map((item) => <MenuItem  key={item} value={item}>{item}</MenuItem>)}
               </Select>
 
             </FormControl>

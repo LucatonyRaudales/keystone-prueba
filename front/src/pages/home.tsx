@@ -25,7 +25,7 @@ const HomePage: React.FunctionComponent<IPage> = props => {
                 </Container>
             </div>
         </div>
-   );
+    );
 }
 
 export default HomePage;

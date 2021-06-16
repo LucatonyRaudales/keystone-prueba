@@ -3,8 +3,10 @@ import { Snackbar, Button, TextField, InputLabel, MenuItem, Select, FormControl,
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import { colors } from "../constants/colors";
 import {  useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -15,22 +17,9 @@ mutation createType($name: String!, $color: String!){
   createEmployees(
     variables:{
       name: $name
-      createdAt: 1546465
-      type:{
-        _id: "60c957be625166b91cec8db9",
-        name: "Nombre del tipo",
-        color: "red"
-      }
+      typeColor: $color
     }
-  ){
-    _id
-    name
-    type{
-      _id
-      name
-      color
-    }
-  }
+  )
 }
 `;
 
@@ -44,26 +33,6 @@ const GET_TYPES = gql`
     }
   }
 `;
-
-
-interface Type{
-    _id: string,
-    name: string,
-    color: string
-}
-interface TypeList {
-  typesList: Type[];
-}
-
-interface Resp {
-  createType: boolean;
-}
-
-
-interface employee{
-    name: string,
-    type: string
-}
 
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -96,6 +65,14 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+interface Type{
+    _id: string,
+    name: string,
+    color: string
+}
+interface TypeList {
+  typesList: Type[];
+}
 
 export default function NewEmployeeComponent() {
   const classes = useStyles();
@@ -103,15 +80,15 @@ export default function NewEmployeeComponent() {
   const [openSuccessSnack, setOpenSuccessSnack] = useState(false);
 
   //const [types, setTypes] = useState<TypeList>();
-  //const [tColor, setTColor] = useState("");
-  const [tName, setTName] = useState("");
+  const [color, setColor] = useState("");
+  const [name, setName] = useState("");
   //const [tID, setTID] = useState("");
   //const [id, setID] = useState("");
   //const [tipo, seTipo] = useState("null");
   const [expanded, setExpanded] = React.useState<string | false>(false);
 
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    //setTName(event.target.value as string);
+    setColor(event.target.value as string);
   };
   const handleChangeExpand = (panel: string) => (event: React.ChangeEvent<{}>, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false);
@@ -119,12 +96,10 @@ export default function NewEmployeeComponent() {
 
 ///Graphql
 
- /* const {  loading, data, error } = useQuery<TypeList>(GET_TYPES);
+  const {  loading, data, error } = useQuery<TypeList>(GET_TYPES);
   if (error) {
     return <p>Error</p>;
   }
-  console.log(data);
-  setTypes(data);*/
   return (
     <div>
     <Accordion expanded={expanded === 'panel1'} onChange={handleChangeExpand('panel1')}  className="m-15">
@@ -138,31 +113,37 @@ export default function NewEmployeeComponent() {
         </AccordionSummary>
         <AccordionDetails>
           <form className={classes.root} noValidate autoComplete="off">
-            <TextField fullWidth label="Nombre" name="name" size="small" variant="outlined" />
+            <TextField 
+            fullWidth 
+            label="Nombre" 
+            name="name" 
+            size="small" 
+            onChange={e => setName(e.target.value)}
+            variant="outlined" />
             
             <FormControl variant="outlined" className={classes.formControl}>
               <InputLabel id="demo-simple-select-outlined-label">Color</InputLabel>
               <Select
                 labelId="demo-simple-select-outlined-label"
                 id="demo-simple-select-outlined"
-                value={tName}
+                value={color}
                 onChange={handleChange}
                 label="Color"
               >
                 <MenuItem value="">
                   <em>Ninguno</em>
                 </MenuItem>
-                {["red", "green", "yellow"].map((item) => <MenuItem  key={item} value={item}>{item}</MenuItem>)}
+                {data && data.typesList.map(({_id, name,color}) => <MenuItem  key={_id} value={color}>{name}</MenuItem>)}
               </Select>
             </FormControl>
 
             <Button 
               onClick={
                 async e => {
-                  let res = await createMessage({ variables: { tName, color } });
+                  let res = await createMessage({ variables: { name, color } });
               console.log(res.data.createType)
               if(!res.data.createType) return setOpenSuccessSnack(true);
-              window.location.href = "/";
+             // window.location.href = "/";
                 }
               }
               color="primary" fullWidth type="submit" variant="contained">

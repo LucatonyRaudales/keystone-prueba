@@ -5,6 +5,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
+import { colors } from "../constants/colors";
 
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -107,7 +108,7 @@ export default function NewTypeComponent() {
                   <em>Ninguno</em>
                 </MenuItem>
 
-              {  ["red", "blue", "white", "green", "yellow", "grey"].map((item, index) => <MenuItem  key={item} value={item}>{item}</MenuItem>)}
+              {  colors.map((item, index) => <MenuItem  key={item} value={item}>{item}</MenuItem>)}
               
               </Select>
             </FormControl>

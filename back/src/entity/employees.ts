@@ -21,8 +21,12 @@ import { Type } from "./types";
     @Column()
     name!: string;
     
+    @Field()
+    @Column()
+    typeColor!: string;
+
     @Field(()=>Date)
-    @CreateDateColumn({type:"timestamp with time zone"})
+    @CreateDateColumn({type:"timestamp with time zone", default: Date.now()})
     createdAt!: Date;
 
     @Field(() => Type)

@@ -12,7 +12,6 @@ import Typography from '@material-ui/core/Typography';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
-import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
 
 /////
 
@@ -36,31 +35,36 @@ import { useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 
 
-const GET_TYPES = gql`
+const GET_EMPLEADOS = gql`
   {
     Employees {
-      _id
-      name
-      type{
-        _id
-        name
-        color
-      }
+    _id
+    name
+    typeColor
+    createdAt
   }
 }
 `;
 
-
-function Alert(props: AlertProps) {
-  return <MuiAlert elevation={6} variant="filled" {...props} />;
-}
+const GET_TYPES = gql`
+  {
+    typesList{
+      _id
+      name
+      color
+    }
+  }
+`;
 
 const EDIT_TYPE = gql`
   mutation createType($id: String!, $name: String!, $color: String!){
-    updateType(
-      id:$id,
-      fields: { name:$name, color: $color }
-    )
+    updateEmployees(
+    id: $id,
+    fields: {
+      name:  $name,
+      typeColor: $color
+    }
+  )
   }
 `;
 
@@ -112,37 +116,38 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+interface Empleado{
+    _id: string,
+    name: string,
+    typeColor: string,
+    createdAt: string
+
+}
+interface Empleados {
+  Employees: Empleado[];
+}
+
+interface Resp {
+  updateEmployees: boolean;
+}
 
 interface Type{
     _id: string,
     name: string,
     color: string
 }
-
-interface Empleado{
-    _id: string,
-    name: string,
-    type: Type
-
-}
 interface TypeList {
-  Employees: Empleado[];
+  typesList: Type[];
 }
 
-interface Resp {
-  createType: boolean;
-}
 
 export default function EmployeeList() {
   const classes = useStyles();
   const [dense, ] = React.useState(false);
   const [name, setName] = useState("");
   const [tColor, setTColor] = useState("");
-  const [tName, setTName] = useState("");
-  const [tID, setTID] = useState("");
   const [id, setID] = useState("");
   const [openSnack, setOpenSnack] = React.useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
 
   const handleCloseSnack = (event: React.SyntheticEvent | React.MouseEvent, reason?: string) => {
     if (reason === 'clickaway') {
@@ -160,13 +165,28 @@ export default function EmployeeList() {
 
 
   ///GraphQL
-  const [createMessage] = useMutation<Resp>(EDIT_TYPE);
+  //const [editEmployee] = useMutation<Resp>(EDIT_TYPE);
+    const [createMessage] = useMutation<Resp>(gql`
+    mutation{
+  updateEmployees(
+    id: "60ca8ccffaad9255247e34c1",
+    fields: {
+      name: "Juan orlando va",
+      typeColor: "yellow"
+    }
+  )
+}
+`);
   const [deleteType] = useMutation(DELETE_TYPE);
-  const {  loading, data, error } = useQuery<TypeList>(GET_TYPES);
+  const {  data, error, loading } = useQuery<Empleados>(GET_EMPLEADOS);
+  const { data: dataR } = useQuery<TypeList>(GET_TYPES);
+
   if (loading) return <CircularProgress />;
   if (error) {
+    console.log(error)
     return <p>Error</p>;
   }
+
 
   console.log(data)
   return (
@@ -179,16 +199,17 @@ export default function EmployeeList() {
           <NewEmployeeComponent />
           <div className={classes.demo}>
             <List dense={dense}>
-              {data && data.Employees.map(({_id, name, type}) =>
+              {data && data.Employees.map(({_id, name, typeColor, createdAt}) =>
                 <div key={_id}>
                   <ListItem>
                     <ListItemAvatar>
                       <Avatar>
-                        <FiberManualRecordIcon style={{ color: "red"}}/>
+                        <FiberManualRecordIcon style={{ color: typeColor}}/>
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
                       primary={name}
+                      secondary={createdAt}
                     />
 
                     <ListItemSecondaryAction>
@@ -201,11 +222,11 @@ export default function EmployeeList() {
                       setOpenSnack(true);
                       }
                       }>
-                        <DeleteIcon style={{ color: 'red' }}/>
+                        <DeleteIcon style={{ color: "red" }}/>
                       </IconButton>
                       <IconButton edge="end" aria-label="edit" onClick={()=>{
                         setID(_id);
-                        setTColor("red");
+                        setTColor(typeColor);
                         setName(name);
                         setOpen(true);
                       }}>
@@ -243,7 +264,7 @@ export default function EmployeeList() {
               <Select
                 labelId="demo-simple-select-outlined-label"
                 id="demo-simple-select-outlined"
-                value={"eleccion"}
+                value={tColor}
                 onChange={handleChange}
                 label="Color" >
 
@@ -251,7 +272,7 @@ export default function EmployeeList() {
                   <em>Ninguno</em>
                 </MenuItem>
 
-              { ["red", "blue", "white", "green", "yellow", "grey"].map((item) => <MenuItem  key={item} value={item}>{item}</MenuItem>)}
+                {dataR && dataR.typesList.map(({_id, name,color}) => <MenuItem  key={_id} value={color}>{name}</MenuItem>)}
               </Select>
 
             </FormControl>
@@ -266,10 +287,11 @@ export default function EmployeeList() {
           <Button onClick={
                 async e => {
                 e.preventDefault();
-                await createMessage({ variables: { id, name, tColor } });
-                //if(!res.data.createType) return 
+                console.log(id, name, tColor)
+                let res = await createMessage({ variables: { id, name, tColor } });
+                //(!res.data.updateEmployees) return 
                 setOpen(false);
-                window.location.href = "/";
+                //window.location.href = "/";
               }} color="primary">
             Guardar
           </Button>
@@ -292,7 +314,7 @@ export default function EmployeeList() {
                 let res = await deleteType({ variables: { id } });
                 console.log(res.data);
                 setOpenSnack(false);
-                if(!res.data.deleteEmployees) return setOpenDelete(true);
+                //if(!res.data.deleteEmployees) return setOpenDelete(true);
                 window.location.href = "/";
               }}>
               Sí bro
@@ -303,13 +325,6 @@ export default function EmployeeList() {
           </React.Fragment>
         }
       />
-
-
-      <Snackbar open={openDelete} autoHideDuration={6000} onClose={()=> setOpenDelete(false)}>
-        <Alert onClose={()=> setOpenDelete(false)} severity="warning">
-          Uy bro!, cuidado!!... están usando este tipo!!
-        </Alert>
-      </Snackbar>
     </div>
   );
 }

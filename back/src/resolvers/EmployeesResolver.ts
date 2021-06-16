@@ -15,13 +15,16 @@ import {
     @Field()
     name!: string;
     
+    @Field()
+    typeColor!: string;
+    
+    /*
     @Field(() => Date)
     createdAt!: Date;
-    
     @Field(() => TypeInputEmployees,)
-    type!: TypeInputEmployees;
+    type!: TypeInputEmployees;*/
   }
-  
+  /*
   @InputType()
   class TypeInputEmployees{
     @Field(() => String)
@@ -34,17 +37,21 @@ import {
     color?: string;
     
   }
-  
+  */
+
   @InputType()
   class EmployeesUpdateInput {
     @Field(() => String, {nullable: true})
     name?: string;
   
+    @Field()
+    typeColor!: string;
+    /*
     @Field(() => Date, {nullable: true})
     createdAt!: Date;
 
     @Field(() => TypeInputEmployees, {nullable: true})
-    type?: TypeInputEmployees;
+    type?: TypeInputEmployees;*/
   }
   
   @Resolver()
@@ -55,14 +62,14 @@ import {
       // @Arg("quantity", () => Int) quantity: number
       @Arg("variables", () => EmployeesInput) variables: EmployeesInput
     ) {
-      console.log(variables);
       const data = await Employees.find({where:{
           "$or":[
             { "name":variables.name,},
-            {"type._id":variables.type._id}
+            {"typeColor":variables.typeColor}
           ]
         }
       })
+      console.log(variables, data.length);
       if(data.length>0)return false;
       const newEmployees = Employees.create(variables);
       await newEmployees.save();
@@ -80,6 +87,7 @@ import {
       @Arg("id", () => String) id: string,
       @Arg("fields", () => EmployeesUpdateInput) fields: EmployeesUpdateInput
     ) {
+      console.log(id, fields)
       await Employees.update(id, fields);
       return true;
     }
