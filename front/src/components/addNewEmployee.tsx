@@ -3,10 +3,8 @@ import { Snackbar, Button, TextField, InputLabel, MenuItem, Select, FormControl,
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import MuiAlert, { AlertProps } from '@material-ui/lab/Alert';
-import { colors } from "../constants/colors";
 import {  useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 function Alert(props: AlertProps) {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
@@ -96,7 +94,7 @@ export default function NewEmployeeComponent() {
 
 ///Graphql
 
-  const {  loading, data, error } = useQuery<TypeList>(GET_TYPES);
+  const {  data, error } = useQuery<TypeList>(GET_TYPES);
   if (error) {
     return <p>Error</p>;
   }
@@ -142,8 +140,8 @@ export default function NewEmployeeComponent() {
                 async e => {
                   let res = await createMessage({ variables: { name, color } });
               console.log(res.data.createType)
-              if(!res.data.createType) return setOpenSuccessSnack(true);
-             // window.location.href = "/";
+              //if(!res.data.createType) return setOpenSuccessSnack(true);
+              window.location.href = "/";
                 }
               }
               color="primary" fullWidth type="submit" variant="contained">

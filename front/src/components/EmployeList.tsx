@@ -56,13 +56,13 @@ const GET_TYPES = gql`
   }
 `;
 
-const EDIT_TYPE = gql`
-  mutation createType($id: String!, $name: String!, $color: String!){
+const UPDATEMPLOYE = gql`
+  mutation updateEmployees($id: String!, $name: String!, $tColor: String!){
     updateEmployees(
     id: $id,
     fields: {
       name:  $name,
-      typeColor: $color
+      typeColor: $tColor
     }
   )
   }
@@ -166,17 +166,7 @@ export default function EmployeeList() {
 
   ///GraphQL
   //const [editEmployee] = useMutation<Resp>(EDIT_TYPE);
-    const [createMessage] = useMutation<Resp>(gql`
-    mutation{
-  updateEmployees(
-    id: "60ca8ccffaad9255247e34c1",
-    fields: {
-      name: "Juan orlando va",
-      typeColor: "yellow"
-    }
-  )
-}
-`);
+    const [createMessage] = useMutation<Resp>(UPDATEMPLOYE);
   const [deleteType] = useMutation(DELETE_TYPE);
   const {  data, error, loading } = useQuery<Empleados>(GET_EMPLEADOS);
   const { data: dataR } = useQuery<TypeList>(GET_TYPES);
@@ -288,10 +278,10 @@ export default function EmployeeList() {
                 async e => {
                 e.preventDefault();
                 console.log(id, name, tColor)
-                let res = await createMessage({ variables: { id, name, tColor } });
+                await createMessage({ variables: { id, name, tColor } });
                 //(!res.data.updateEmployees) return 
                 setOpen(false);
-                //window.location.href = "/";
+                window.location.href = "/";
               }} color="primary">
             Guardar
           </Button>

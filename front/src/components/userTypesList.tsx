@@ -62,9 +62,10 @@ const EDIT_TYPE = gql`
 `;
 
 const DELETE_TYPE = gql`
-  mutation deleteType($id: String! ){
+  mutation deleteType($id: String!, $color: String! ){
       deleteType(
         id: $id
+        typeColor: $color
       )
   }
 `;
@@ -120,7 +121,7 @@ interface TypeList {
 }
 
 interface Resp {
-  createType: boolean;
+  updateType: boolean;
 }
 
 export default function UserTYpesList() {
@@ -139,6 +140,7 @@ export default function UserTYpesList() {
     setOpenSnack(false);
   };
   const [open, setOpen] = React.useState(false);
+  const [openSuccessSnack, setOpenSuccessSnack] = useState(false);
   const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setColor(event.target.value as string);
   };
@@ -148,7 +150,7 @@ export default function UserTYpesList() {
 
 
   ///GraphQL
-  const [createMessage] = useMutation<Resp>(EDIT_TYPE);
+  const [createMessage] = useMutation(EDIT_TYPE);
   const [deleteType] = useMutation(DELETE_TYPE);
   const {  loading, data, error } = useQuery<TypeList>(GET_TYPES);
   if (loading) return <CircularProgress />;
@@ -186,6 +188,7 @@ export default function UserTYpesList() {
                       aria-label="delete" 
                       onClick={()=>{
                       setID(_id);
+                      setColor(color);
                       setOpenSnack(true);
                       }
                       }>
@@ -254,8 +257,8 @@ export default function UserTYpesList() {
           <Button onClick={
                 async e => {
                 e.preventDefault();
-                await createMessage({ variables: { id, name, color } });
-                //if(!res.data.createType) return 
+                let res = await createMessage({ variables: { id, name, color } });
+                if(!res.data.updateType) return setOpenSuccessSnack(true); 
                 setOpen(false);
                 window.location.href = "/";
               }} color="primary">
@@ -277,7 +280,7 @@ export default function UserTYpesList() {
             <Button color="secondary" size="small" onClick={
                 async e => {
                 e.preventDefault();
-                let res = await deleteType({ variables: { id } });
+                let res = await deleteType({ variables: { id, color } });
                 console.log(res.data.deleteType);
                 setOpenSnack(false);
                 if(!res.data.deleteType) return setOpenDelete(true);
@@ -293,6 +296,12 @@ export default function UserTYpesList() {
       />
 
 
+      <Snackbar open={openSuccessSnack} autoHideDuration={6000} onClose={()=> setOpenSuccessSnack(false)}>
+        <Alert onClose={()=> setOpenSuccessSnack(false)} severity="error">
+          Nell my friend, ese color || nombre ya está en uso bro!
+        </Alert>
+      </Snackbar>
+      
       <Snackbar open={openDelete} autoHideDuration={6000} onClose={()=> setOpenDelete(false)}>
         <Alert onClose={()=> setOpenDelete(false)} severity="warning">
           Uy bro!, cuidado!!... están usando este tipo!!

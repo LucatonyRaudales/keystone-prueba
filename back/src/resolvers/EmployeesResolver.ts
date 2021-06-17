@@ -62,15 +62,6 @@ import {
       // @Arg("quantity", () => Int) quantity: number
       @Arg("variables", () => EmployeesInput) variables: EmployeesInput
     ) {
-      const data = await Employees.find({where:{
-          "$or":[
-            { "name":variables.name,},
-            {"typeColor":variables.typeColor}
-          ]
-        }
-      })
-      console.log(variables, data.length);
-      if(data.length>0)return false;
       const newEmployees = Employees.create(variables);
       await newEmployees.save();
       return true;

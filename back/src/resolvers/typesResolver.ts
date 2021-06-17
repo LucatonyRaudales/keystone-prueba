@@ -43,7 +43,6 @@ export class TypeResolver{
     }
   });
 
-    console.log(variables, res.length);
     if(res.length > 0) return false 
     const newType = Type.create(variables);
     //return await newType.save();
@@ -56,16 +55,28 @@ export class TypeResolver{
     @Arg("id") id: string,
     @Arg("fields", () => TypeUpdateInput) fields: TypeUpdateInput
   ) {
-    var res = await Type.update(id , fields);
-    console.log(id, res)
+    const res = await Type.find({
+  where: {
+    $or: [
+        {name : fields.name},
+        {color : fields.color}
+      ]
+    }
+  });
+
+    console.log(fields, res.length);
+    if(res.length > 0) return false 
+    const newType = Type.create(fields);
+    //return await newType.save()
+    await Type.update(id , fields);
     return true;
   }
 
   @Mutation(() => Boolean)
-  async deleteType( @Arg("id") id: string,) {
+  async deleteType( @Arg("id") id: string,  @Arg("typeColor") typeColor: string) {
 
     var data = await Employees.find({where:{
-     "type._id":id
+     "typeColor":typeColor
       
     }});
     console.log(data);
