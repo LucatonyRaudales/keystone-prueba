@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  front:
+    container_name: front_app
+    restart: always
+    build: ./front
+    ports: 
+      - "3000:3000"
+    depends_on:
+      - back
+
+  back:
+    container_name: back_app
+    restart: always
+    build: ./back
+    ports: 
+      - "3001:3001"
+  
